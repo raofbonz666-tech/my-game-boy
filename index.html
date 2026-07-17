@@ -26,6 +26,7 @@
 
         #bag { position: absolute; width: 110.62px; height: 110.62px; background-image: url('bagbag.png'); background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
         #enemy { position: absolute; width: 63.6px; height: 63.6px; background: url('dduke.png') center/contain no-repeat; z-index: 9; }
+        #masha { position: absolute; top: 200px; left: 200px; width: 80px; height: 80px; background: url('masha.png') center/contain no-repeat; z-index: 5; }
         
         .bomb { position: absolute; width: 60px; height: 60px; background: url('boom2.png') center/contain no-repeat; z-index: 8; }
         .sus-bomb { position: absolute; width: 80px; height: 80px; background: url('sus.png') center/contain no-repeat; z-index: 8; cursor: pointer; }
@@ -42,6 +43,7 @@
     <img id="starterImage" src="jame.png" alt="Starter" onclick="initGame()">
     
     <div id="ak"></div>
+    <div id="masha"></div>
     <div id="hearts"><script>for(let i=0; i<10; i++) document.write('<div class="heart"></div>');</script></div>
     
     <div id="gameOver">
@@ -67,7 +69,7 @@
 
     <script>
         let score = 0, gameActive = false, lives = 10, ex = 100, ey = 100, vx = 5, vy = 5, mouseX = 0, mouseY = 0, bombs = [];
-        const bag = document.getElementById('bag'), enemy = document.getElementById('enemy'), scoreEl = document.getElementById('score'), ak = document.getElementById('ak');
+        const bag = document.getElementById('bag'), enemy = document.getElementById('enemy'), scoreEl = document.getElementById('score'), ak = document.getElementById('ak'), masha = document.getElementById('masha');
 
         function startVideo() {
             document.getElementById('videoBg').play();
@@ -109,6 +111,11 @@
         function gameLoop() {
             if (!gameActive) return;
             
+            // إخفاء ماشا عند وصول السكور لـ 3000
+            if (score >= 3000) {
+                masha.style.display = 'none';
+            }
+            
             if (score >= 3500) {
                 enemy.style.display = 'none';
                 ak.style.display = 'block';
@@ -120,7 +127,6 @@
             }
 
             bombs.forEach(b => {
-                // إخفاء الـ sus-bomb عند وصول السكور لـ 3500
                 if (score >= 3500 && b.classList.contains('sus-bomb')) {
                     b.style.display = 'none';
                 }
@@ -202,19 +208,23 @@
         }
 
         function shootCatFromAK() {
-            let bulletCount = (score >= 3500) ? 100 : 1;
+            let bulletCount = 30; 
             for (let i = 0; i < bulletCount; i++) {
                 setTimeout(() => {
                     let cat = document.createElement('div');
                     cat.className = 'cat-bullet';
-                    cat.style.left = "80px"; cat.style.bottom = "80px";
+                    cat.style.left = "80px"; 
+                    cat.style.bottom = "80px";
                     document.body.appendChild(cat);
-                    let angle = Math.atan2((window.innerHeight - mouseY) - 80, mouseX - 80) + (Math.random() - 0.5) * 0.2;
+                    
+                    let angle = Math.atan2((window.innerHeight - mouseY) - 80, mouseX - 80) + (Math.random() - 0.1) * 0.1;
                     let speed = 15;
+                    
                     let interval = setInterval(() => {
                         let catX = parseFloat(cat.style.left), catY = parseFloat(cat.style.bottom);
                         cat.style.left = (catX + Math.cos(angle) * speed) + 'px';
                         cat.style.bottom = (catY + Math.sin(angle) * speed) + 'px';
+                        
                         let cR = cat.getBoundingClientRect(), bR = bag.getBoundingClientRect();
                         if (cR.left < bR.right && cR.right > bR.left && cR.top < bR.bottom && cR.bottom > bR.top) {
                             loseLife(); cat.remove(); clearInterval(interval);
@@ -223,7 +233,7 @@
                             cat.remove(); clearInterval(interval); 
                         }
                     }, 30);
-                }, i * 50);
+                }, i * 100); 
             }
         }
 
