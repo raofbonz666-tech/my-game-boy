@@ -138,8 +138,10 @@
             }
         }
 
-        document.addEventListener('mousemove', updatePosition);
-        document.addEventListener('touchmove', (e) => { updatePosition(e); e.preventDefault(); }, {passive: false});
+        // إعدادات التحكم للماوس واللمس
+        window.addEventListener('mousemove', updatePosition);
+        window.addEventListener('touchstart', (e) => { updatePosition(e); }, {passive: false});
+        window.addEventListener('touchmove', (e) => { updatePosition(e); e.preventDefault(); }, {passive: false});
 
         function createBomb() {
             let b = document.createElement('div');
@@ -149,6 +151,8 @@
             document.body.appendChild(b);
             bombs.push(b);
             b.onmouseover = () => { loseLife(); removeBomb(b); };
+            // إضافة دعم اللمس للقنابل أيضاً
+            b.addEventListener('touchstart', (e) => { e.preventDefault(); loseLife(); removeBomb(b); });
             setTimeout(() => { if(b.parentNode) b.remove(); }, 10000);
         }
 
