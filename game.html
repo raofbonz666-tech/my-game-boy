@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>لعبة الكيس والبصلة الاحترافية</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: url('lol.png') center/cover no-repeat fixed #2c3e50; cursor: none; font-family: sans-serif; }
+        #videoBg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 999; }
+        #hhhhoVideo { position: fixed; top: 10px; right: 10px; width: 300px; height: 200px; z-index: 1000; border: 3px solid gold; border-radius: 10px; pointer-events: none; }
+        #sideImage { position: fixed; bottom: 120px; left: 20px; width: 120px; height: 120px; border: 3px solid gold; border-radius: 10px; z-index: 1001; }
+        #ak { position: fixed; bottom: 50px; left: 50px; width: 120px; height: 80px; background: url('ak.png') center/contain no-repeat; z-index: 998; display: none; }
+        #hearts { position: fixed; top: 20px; left: 20px; display: flex; gap: 5px; z-index: 100; }
+        .heart { width: 40px; height: 40px; background: url('burger.png') center/contain no-repeat; }
+        .extra-heart { position: absolute; width: 40px; height: 40px; background: url('burger.png') center/contain no-repeat; z-index: 15; cursor: pointer; }
+        #scoreBoard { position: fixed; top: 20px; right: 20px; color: #FFD700; font-size: 28px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 10px 20px; border-radius: 50px; border: 2px solid #FFD700; z-index: 100; pointer-events: none; }
+        
+        /* شاشة الخسارة الكبيرة */
+        #gameOver { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; background: rgba(0,0,0,0.95); color: red; padding: 60px; border: 8px solid red; font-size: 70px; font-weight: bold; text-align: center; z-index: 2000; border-radius: 30px; min-width: 60%; }
+        #broVideo { width: 800px; height: 500px; border: 5px solid white; border-radius: 15px; display: block; margin: 30px auto; object-fit: cover; }
+        .restart-text { font-size: 35px; color: white; cursor: pointer; text-decoration: underline; transition: 0.3s; }
+        .restart-text:hover { color: gold; }
+
+        #bag { position: absolute; width: 80px; height: 80px; background: url('bag2.png') center/contain no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
+        #enemy { position: absolute; width: 60px; height: 60px; background: url('onion.png') center/contain no-repeat; z-index: 9; }
+        .bomb { position: absolute; width: 60px; height: 60px; background: url('boom2.png') center/contain no-repeat; z-index: 8; }
+        .sus-bomb { position: absolute; width: 80px; height: 80px; background: url('sus.png') center/contain no-repeat; z-index: 8; cursor: pointer; }
+        .cat-bullet { position: absolute; width: 50px; height: 50px; background: url('cat.png') center/contain no-repeat; z-index: 12; }
+        .explosion { position: absolute; width: 120px; height: 120px; background: url('aff.png') center/contain no-repeat; z-index: 20; }
+        #startMsg, #startVideo { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 30px; cursor: pointer; background: rgba(0,0,0,0.8); padding: 30px; border-radius: 15px; border: 2px solid gold; z-index: 9999; text-align: center; }
+    </style>
+</head>
+<body>
+    <video id="videoBg" loop playsinline src="nigga.mp4" style="width:100%; height:100%; object-fit:cover; position:fixed; top:0; left:0; z-index:999;"></video>
+    <video id="hhhhoVideo" loop muted playsinline src="hhhho.mp4"></video>
+    <img id="sideImage" src="jame.png" alt="Profile">
+    <div id="ak"></div>
+    <div id="hearts"><script>for(let i=0; i<10; i++) document.write('<div class="heart"></div>');</script></div>
+    
+    <div id="gameOver">
+        GAME OVER
+        <!-- الفيديو المطلوب -->
+        <video id="broVideo" loop playsinline src="bro.mp4"></video>
+        <div class="restart-text" onclick="location.reload()">اضغط للبدء من جديد</div>
+    </div>
+
+    <div id="startVideo" onclick="startVideo()">اضغط هنا لتشغيل العرض</div>
+    <div id="startMsg" onclick="initGame()" style="display:none;">اضغط هنا للبدء</div>
+    <div id="scoreBoard">النقاط: <span id="score">0</span></div>
+    
+    <audio id="s2" src="bd-llh-drys.mp3" loop></audio>
+    <audio id="explosionSound" src="roblox-explosion-sound.mp3"></audio>
+    <div id="bag"></div>
+    <div id="enemy"></div>
+
+    <script>
+        let score = 0, gameActive = false, lives = 10, ex = 100, ey = 100, vx = 5, vy = 5, mouseX = 0, mouseY = 0, bombs = [];
+        const bag = document.getElementById('bag'), enemy = document.getElementById('enemy'), scoreEl = document.getElementById('score'), ak = document.getElementById('ak'), sideImg = document.getElementById('sideImage');
+
+        function startVideo() {
+            document.getElementById('videoBg').play();
+            document.getElementById('hhhhoVideo').play();
+            document.getElementById('startVideo').style.display = 'none';
+            document.getElementById('startMsg').style.display = 'block';
+        }
+
+        function initGame() {
+            if(gameActive) return;
+            let v1 = document.getElementById('videoBg'), v2 = document.getElementById('hhhhoVideo');
+            v1.pause(); v1.currentTime = 0; v1.style.display = 'none';
+            v2.pause(); v2.currentTime = 0; v2.style.display = 'none';
+            document.getElementById('startMsg').style.display = 'none';
+            document.getElementById('s2').play().catch(()=>{});
+            gameActive = true;
+            gameLoop();
+            setInterval(() => { if(gameActive) throwCat(); }, 2500);
+        }
+
+        function loseLife() {
+            lives--;
+            let h = document.querySelectorAll('.heart');
+            if (h.length > 0) h[h.length - 1].remove();
+            if (lives <= 0) { 
+                gameActive = false; 
+                document.getElementById('gameOver').style.display = 'block'; 
+                
+                // إيقاف الموسيقى
+                let music = document.getElementById('s2');
+                music.pause();
+                music.currentTime = 0;
+                
+                // تشغيل الفيديو مع الصوت
+                document.getElementById('broVideo').play(); 
+            }
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+            ex += vx; ey += vy;
+            if (ex > window.innerWidth - 60 || ex < 0) vx *= -1;
+            if (ey > window.innerHeight - 60 || ey < 0) vy *= -1;
+            enemy.style.left = ex + 'px'; enemy.style.top = ey + 'px';
+            if (score >= 3000) { ak.style.display = 'block'; sideImg.style.display = 'none'; }
+            bombs.forEach(b => {
+                if (b.classList.contains('sus-bomb')) {
+                    let bX = parseFloat(b.style.left), bY = parseFloat(b.style.top);
+                    b.style.left = (bX + (mouseX - bX) * 0.015) + 'px';
+                    b.style.top = (bY + (mouseY - bY) * 0.015) + 'px';
+                    if (Math.abs(bX - mouseX) < 40 && Math.abs(bY - mouseY) < 40) { loseLife(); removeBomb(b); }
+                }
+            });
+            let dx = (ex + 30) - mouseX, dy = (ey + 30) - mouseY;
+            bag.style.transform = `rotate(${Math.atan2(dy, dx) * 180 / Math.PI + 90}deg)`;
+            bag.style.left = (mouseX - 40) + 'px'; bag.style.top = (mouseY - 40) + 'px';
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            let dx = (ex + 30) - mouseX, dy = (ey + 30) - mouseY;
+            if (Math.abs(dx) < 60 && Math.abs(dy) < 60) {
+                score += 10; scoreEl.innerText = score;
+                vx = (Math.random() - 0.5) * 20; vy = (Math.random() - 0.5) * 20;
+                if (score > 0 && score % 50 === 0) createBomb();
+                if (score > 0 && score % 500 === 0) dropHeart();
+                if (score >= 3000 && Math.random() < 0.2) shootCatFromAK();
+            }
+        });
+
+        function createBomb() {
+            let b = document.createElement('div');
+            b.className = (score >= 2000) ? 'sus-bomb' : 'bomb';
+            b.style.left = Math.random() * (window.innerWidth - 80) + 'px';
+            b.style.top = Math.random() * (window.innerHeight - 80) + 'px';
+            document.body.appendChild(b);
+            bombs.push(b);
+            b.onmouseover = () => { loseLife(); removeBomb(b); };
+            setTimeout(() => { if(b.parentNode) b.remove(); }, 10000);
+        }
+
+        function removeBomb(b) {
+            document.getElementById('explosionSound').play().catch(()=>{});
+            let exp = document.createElement('div');
+            exp.className = 'explosion';
+            exp.style.left = b.style.left; exp.style.top = b.style.top;
+            document.body.appendChild(exp);
+            setTimeout(() => exp.remove(), 500);
+            b.remove();
+        }
+
+        function dropHeart() {
+            let heart = document.createElement('div');
+            heart.className = 'extra-heart';
+            heart.style.left = Math.random() * (window.innerWidth - 40) + 'px';
+            heart.style.top = '-40px';
+            document.body.appendChild(heart);
+            let posY = -40;
+            let interval = setInterval(() => {
+                if (!gameActive) { clearInterval(interval); heart.remove(); return; }
+                posY += 5; heart.style.top = posY + 'px';
+                let hR = heart.getBoundingClientRect(), bR = bag.getBoundingClientRect();
+                if (hR.left < bR.right && hR.right > bR.left && hR.top < bR.bottom && hR.bottom > bR.top) {
+                    lives = 10;
+                    document.getElementById('hearts').innerHTML = '';
+                    for(let i=0; i<10; i++) document.getElementById('hearts').appendChild(document.createElement('div')).className = 'heart';
+                    heart.remove(); clearInterval(interval);
+                }
+                if (posY > window.innerHeight) { heart.remove(); clearInterval(interval); }
+            }, 30);
+        }
+
+        function shootCatFromAK() {
+            let cat = document.createElement('div');
+            cat.className = 'cat-bullet';
+            cat.style.left = "80px"; cat.style.bottom = "80px";
+            document.body.appendChild(cat);
+            let angle = Math.atan2((window.innerHeight - mouseY) - 80, mouseX - 80);
+            let interval = setInterval(() => {
+                let catX = parseFloat(cat.style.left), catY = parseFloat(cat.style.bottom);
+                cat.style.left = (catX + Math.cos(angle) * 15) + 'px';
+                cat.style.bottom = (catY + Math.sin(angle) * 15) + 'px';
+                let cR = cat.getBoundingClientRect(), bR = bag.getBoundingClientRect();
+                if (cR.left < bR.right && cR.right > bR.left && cR.top < bR.bottom && cR.bottom > bR.top) {
+                    loseLife(); cat.remove(); clearInterval(interval);
+                }
+                if (!gameActive || catX > window.innerWidth || catY > window.innerHeight) { cat.remove(); clearInterval(interval); }
+            }, 30);
+        }
+
+        function throwCat() {
+            let cat = document.createElement('div');
+            cat.className = 'cat-bullet';
+            cat.style.left = Math.random() * (window.innerWidth - 50) + 'px';
+            cat.style.top = '-50px';
+            document.body.appendChild(cat);
+            let posY = -50;
+            let interval = setInterval(() => {
+                if (!gameActive) { clearInterval(interval); cat.remove(); return; }
+                posY += 7; cat.style.top = posY + 'px';
+                let cR = cat.getBoundingClientRect(), bR = bag.getBoundingClientRect();
+                if (cR.left < bR.right && cR.right > bR.left && cR.top < bR.bottom && cR.bottom > bR.top) {
+                    loseLife(); cat.remove(); clearInterval(interval);
+                }
+                if (posY > window.innerHeight) { cat.remove(); clearInterval(interval); }
+            }, 30);
+        }
+    </script>
+</body>
+</html>
