@@ -23,8 +23,12 @@
         .restart-text { font-size: 35px; color: white; cursor: pointer; text-decoration: underline; transition: 0.3s; margin-top: 10px; }
         .restart-text:hover { color: gold; }
 
-        #bag { position: absolute; width: 80px; height: 80px; background-image: url('bagbag.png'); background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
-        #enemy { position: absolute; width: 60px; height: 60px; background: url('dduke.png') center/contain no-repeat; z-index: 9; }
+        /* تم التعديل: تصغير bag بنسبة 4% */
+        #bag { position: absolute; width: 115.2px; height: 115.2px; background-image: url('bagbag.png'); background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
+        
+        /* تم التعديل: تكبير enemy بنسبة 6% */
+        #enemy { position: absolute; width: 63.6px; height: 63.6px; background: url('dduke.png') center/contain no-repeat; z-index: 9; }
+        
         .bomb { position: absolute; width: 60px; height: 60px; background: url('boom2.png') center/contain no-repeat; z-index: 8; }
         .sus-bomb { position: absolute; width: 80px; height: 80px; background: url('sus.png') center/contain no-repeat; z-index: 8; cursor: pointer; }
         .cat-bullet { position: absolute; width: 50px; height: 50px; background: url('cat.png') center/contain no-repeat; z-index: 12; }
@@ -52,7 +56,7 @@
     </div>
 
     <div id="startVideo" onclick="startVideo()">look my song</div>
-    <div id="startMsg" onclick="initGame()" style="display:none;">اضغط هنا للبدء</div>
+    <div id="startMsg" onclick="initGame()" style="display:none; cursor:pointer;">اضغط هنا للبدء بملء الشاشة</div>
     <div id="scoreBoard">النقاط: <span id="score">0</span></div>
     
     <audio id="s2" src="car.mp4" loop></audio>
@@ -73,9 +77,11 @@
 
         function initGame() {
             if(gameActive) return;
+            let elem = document.documentElement;
+            if (elem.requestFullscreen) elem.requestFullscreen();
+            else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
             let v1 = document.getElementById('videoBg'), v2 = document.getElementById('hhhhoVideo');
-            v1.pause(); v1.style.display = 'none';
-            v2.pause(); v2.style.display = 'none';
+            v1.pause(); v1.style.display = 'none'; v2.pause(); v2.style.display = 'none';
             document.getElementById('startMsg').style.display = 'none';
             document.getElementById('s2').play().catch(()=>{});
             gameActive = true;
@@ -91,8 +97,7 @@
                 gameActive = false; 
                 document.getElementById('gameOver').style.display = 'block'; 
                 let music = document.getElementById('s2');
-                music.pause();
-                music.currentTime = 0;
+                music.pause(); music.currentTime = 0;
                 document.getElementById('broVideo').play(); 
             }
         }
@@ -100,8 +105,8 @@
         function gameLoop() {
             if (!gameActive) return;
             ex += vx; ey += vy;
-            if (ex > window.innerWidth - 60 || ex < 0) vx *= -1;
-            if (ey > window.innerHeight - 60 || ey < 0) vy *= -1;
+            if (ex > window.innerWidth - 63.6 || ex < 0) vx *= -1;
+            if (ey > window.innerHeight - 63.6 || ey < 0) vy *= -1;
             enemy.style.left = ex + 'px'; enemy.style.top = ey + 'px';
             if (score >= 3000) { ak.style.display = 'block'; sideImg.style.display = 'none'; }
             bombs.forEach(b => {
@@ -112,24 +117,19 @@
                     if (Math.abs(bX - mouseX) < 40 && Math.abs(bY - mouseY) < 40) { loseLife(); removeBomb(b); }
                 }
             });
-            let dx = (ex + 30) - mouseX, dy = (ey + 30) - mouseY;
+            let dx = (ex + 31.8) - mouseX, dy = (ey + 31.8) - mouseY;
             bag.style.transform = `rotate(${Math.atan2(dy, dx) * 180 / Math.PI + 90}deg)`;
-            bag.style.left = (mouseX - 40) + 'px'; bag.style.top = (mouseY - 40) + 'px';
+            bag.style.left = (mouseX - 57.6) + 'px'; bag.style.top = (mouseY - 57.6) + 'px';
             requestAnimationFrame(gameLoop);
         }
 
         function updatePosition(e) {
             let clientX, clientY;
-            if (e.touches) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
-            }
+            if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+            else { clientX = e.clientX; clientY = e.clientY; }
             mouseX = clientX; mouseY = clientY;
-            let dx = (ex + 30) - mouseX, dy = (ey + 30) - mouseY;
-            if (Math.abs(dx) < 60 && Math.abs(dy) < 60) {
+            let dx = (ex + 31.8) - mouseX, dy = (ey + 31.8) - mouseY;
+            if (Math.abs(dx) < 100 && Math.abs(dy) < 100) {
                 score += 10; scoreEl.innerText = score;
                 vx = (Math.random() - 0.5) * 20; vy = (Math.random() - 0.5) * 20;
                 if (score > 0 && score % 50 === 0) createBomb();
@@ -138,7 +138,6 @@
             }
         }
 
-        // إعدادات التحكم للماوس واللمس
         window.addEventListener('mousemove', updatePosition);
         window.addEventListener('touchstart', (e) => { updatePosition(e); }, {passive: false});
         window.addEventListener('touchmove', (e) => { updatePosition(e); e.preventDefault(); }, {passive: false});
@@ -151,7 +150,6 @@
             document.body.appendChild(b);
             bombs.push(b);
             b.onmouseover = () => { loseLife(); removeBomb(b); };
-            // إضافة دعم اللمس للقنابل أيضاً
             b.addEventListener('touchstart', (e) => { e.preventDefault(); loseLife(); removeBomb(b); });
             setTimeout(() => { if(b.parentNode) b.remove(); }, 10000);
         }
