@@ -23,7 +23,8 @@
         .restart-text { font-size: 35px; color: white; cursor: pointer; text-decoration: underline; transition: 0.3s; margin-top: 10px; }
         .restart-text:hover { color: gold; }
 
-        #bag { position: absolute; width: 115.2px; height: 115.2px; background-image: url('bagbag.png'); background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
+        /* تم التصغير بنسبة 3% */
+        #bag { position: absolute; width: 111.74px; height: 111.74px; background-image: url('bagbag.png'); background-size: contain; background-position: center; background-repeat: no-repeat; pointer-events: none; z-index: 10; transition: transform 0.05s; }
         
         #enemy { position: absolute; width: 63.6px; height: 63.6px; background: url('dduke.png') center/contain no-repeat; z-index: 9; }
         
@@ -67,7 +68,6 @@
         let score = 0, gameActive = false, lives = 10, ex = 100, ey = 100, vx = 5, vy = 5, mouseX = 0, mouseY = 0, bombs = [];
         const bag = document.getElementById('bag'), enemy = document.getElementById('enemy'), scoreEl = document.getElementById('score'), ak = document.getElementById('ak'), sideImg = document.getElementById('sideImage');
 
-        // إضافة حدث الصوت للصورة
         sideImg.addEventListener('click', function() {
             const sound = document.getElementById('meowSound');
             sound.currentTime = 0;
@@ -125,7 +125,7 @@
             });
             let dx = (ex + 31.8) - mouseX, dy = (ey + 31.8) - mouseY;
             bag.style.transform = `rotate(${Math.atan2(dy, dx) * 180 / Math.PI + 90}deg)`;
-            bag.style.left = (mouseX - 57.6) + 'px'; bag.style.top = (mouseY - 57.6) + 'px';
+            bag.style.left = (mouseX - 55.87) + 'px'; bag.style.top = (mouseY - 55.87) + 'px';
             requestAnimationFrame(gameLoop);
         }
 
